@@ -3,9 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var vhost = require('vhost');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var apiRouter = require('./routes/api');
 
 var app = express();
 
@@ -18,6 +20,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+/**
+ * 编辑开发主机 hosts 文件
+ *  127.0.0.1 www.localhost.com
+ *  127.0.0.1 api.localhost.com
+ *
+ * 浏览器访问：
+ *  http://www.localhost.com:3000/
+ *  http://api.localhost.com:3000/
+ */
+// apply the vhost middleware, before the router middleware
+app.use(vhost('api.*.*', apiRouter));// 注意这里用 api.* 不生效的
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
